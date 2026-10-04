@@ -23,3 +23,24 @@
 | 320×320 | Downscale from 640 | Bilinear | 0.868 ± 0.011 | 0.826 ± 0.015 | 0.847 ± 0.006 | 0.819 ± 0.006 | 0.538 ± 0.006 | 1.6 | 11.03 ± 0.48 | 2.59 |
 | 160×160 | Downscale from 640 | Bilinear | 0.838 ± 0.008 | 0.698 ± 0.030 | 0.761 ± 0.020 | 0.716 ± 0.012 | 0.452 ± 0.011 | 0.4 | 9.98 ± 0.22 | 2.59 |
 | 80×80 | Downscale from 640 | Bilinear | 0.701 ± 0.079 | 0.584 ± 0.012 | 0.635 ± 0.035 | 0.520 ± 0.047 | 0.294 ± 0.015 | 0.1 | 9.96 ± 0.42 | 2.59 |
+
+## Table 4: Detection Accuracy and Spatial Preprocessing Overhead
+Empirical benchmark measured across 500 images (Mean ± Std ms) on NVIDIA RTX 4060 host.
+- **Baseline**: 0.00 ms (native hardware capture at resolution $R$).
+- **Cropped**: $640 \to 400$ ROI crop followed by bilinear resampling to resolution $R$.
+- **Collage**: Pure 3-patch spatial tiling on native resolution $R$ image (no downscale included).
+
+| Method | Input | Accuracy | Added Latency (ms) |
+|---|---|---|---|
+| **Baseline** | 640 | 0.767 ± 0.008 | 0.00 ± 0.00 |
+| | 320 | **0.769 ± 0.006** | 0.00 ± 0.00 |
+| | 160 | 0.728 ± 0.002 | 0.00 ± 0.00 |
+| | 80 | 0.665 ± 0.023 | 0.00 ± 0.00 |
+| **Cropped** | 640* | 0.756 ± 0.012 | 2.63 ± 0.47 |
+| | 320 | **0.786 ± 0.004** | 1.12 ± 0.44 |
+| | 160 | 0.754 ± 0.014 | 0.59 ± 0.10 |
+| | 80 | 0.706 ± 0.007 | 0.48 ± 0.11 |
+| **Collage** | 640 | 0.721 ± 0.016 | 0.59 ± 0.09 |
+| | 320 | **0.735 ± 0.001** | 0.06 ± 0.02 |
+| | 160 | 0.643 ± 0.017 | 0.02 ± 0.01 |
+| | 80 | 0.483 ± 0.040 | 0.02 ± 0.01 |
