@@ -16,7 +16,9 @@ An empirical investigation into **input-space spatial compression** for safety-c
    On **Yawning** detection at $80 \times 80$, Cropped ROI achieves **0.733 mAP@0.5** vs Baseline's **0.496** (+23.7 points), proving that removing irrelevant interior vehicle pixels preserves feature density for mouth/eye kinematics.
 3. **Collage Boundary Penalty**:
    Stitching driver interaction patches introduces artificial seam boundaries across hand/head trajectories, causing catastrophic degradation at small resolutions ($80 \times 80$ drops to 0.256 mAP on Yawning).
-4. **Negligible Preprocessing Latency**:
+4. **$320 \times 320$\,px Universal Peak Accuracy**:
+   Across all three framing methods, $320 \times 320$\,px achieves superior composite accuracy over native $640 \times 640$\,px. Cropped at $320 \times 320$\,px achieves peak overall accuracy (**0.786**) while boosting throughput by **+25.7 FPS** (+31%) over native 640 Baseline.
+5. **Negligible Preprocessing Latency**:
    On-the-fly ROI extraction takes only **0.56–1.00 ms** on CPU host, delivering sustained end-to-end pipeline throughput of **>110 FPS** on an NVIDIA RTX 4060.
 
 ---
@@ -83,6 +85,24 @@ All metrics reported on the **held-out test split** across 3 seeds ($\text{Mean}
 | **Collage @ 160×160** | 0.547 ± 0.031 | 0.721 ± 0.035 | 0.829 ± 0.030 | 0.767 ± 0.006 | 0.716 ± 0.012 |
 | **Collage @ 80×80** | 0.256 ± 0.072 | 0.511 ± 0.051 | 0.575 ± 0.042 | 0.736 ± 0.026 | 0.520 ± 0.047 |
 
+### Table 5: Accuracy vs Throughput Pareto Trade-off
+*Composite Accuracy denotes $\frac{1}{3}(\text{F1} + \text{mAP}_{50} + \text{mAP}_{50\text{--}95})$. $\Delta\text{FPS}$ relative to native 640 Baseline ($83.1\,\text{FPS}$). Batch size 1 on RTX 4060.*
+
+| Method | Resolution | Composite Accuracy | E2E Latency (ms) | E2E FPS | $\Delta$ FPS (vs Baseline 640) |
+|---|---|---|---|---|---|
+| **Baseline** | 640×640 | 0.767 ± 0.008 | 12.03 ± 0.21 | 83.1 ± 1.5 | --- (Ref) |
+| | 320×320 | **0.769 ± 0.006** | 10.83 ± 0.26 | 92.4 ± 2.3 | +9.3 |
+| | 160×160 | 0.728 ± 0.002 | 8.51 ± 0.31 | 117.7 ± 4.1 | +34.6 |
+| | 80×80 | 0.665 ± 0.023 | 9.11 ± 0.24 | 109.9 ± 2.9 | +26.8 |
+| **Cropped** | 640×640* | 0.756 ± 0.012 | 15.10 ± 0.28 | 66.2 ± 1.3 | -16.9 |
+| | 320×320 | **0.786 ± 0.004** | 9.21 ± 0.39 | 108.8 ± 4.7 | **+25.7** |
+| | 160×160 | 0.754 ± 0.014 | 8.90 ± 0.30 | 112.5 ± 3.8 | +29.4 |
+| | 80×80 | 0.706 ± 0.007 | 8.80 ± 0.19 | 113.7 ± 2.4 | +30.6 |
+| **Collage** | 640×640 | 0.721 ± 0.016 | 13.13 ± 0.59 | 76.3 ± 3.4 | -6.8 |
+| | 320×320 | **0.735 ± 0.001** | 11.60 ± 0.64 | 86.4 ± 4.6 | +3.3 |
+| | 160×160 | 0.643 ± 0.017 | 11.38 ± 0.33 | 87.9 ± 2.5 | +4.8 |
+| | 80×80 | 0.483 ± 0.040 | 10.25 ± 0.22 | 97.6 ± 2.1 | +14.5 |
+
 ---
 
 ## Repository Structure
@@ -95,11 +115,13 @@ ROI-DMS/
 ├── results/                   # Evaluation summaries and state
 │   ├── progress.json          # Complete 36-run tracking log
 │   ├── summary_table.csv      # Model-level macro metrics & latency
-│   └── per_class_summary.csv  # Class-level precision, recall, mAP, F1
+│   ├── per_class_summary.csv  # Class-level precision, recall, mAP, F1
+│   └── rebenchmarked_fps.csv  # Sustained hardware benchmark verification log
 ├── scripts/
 │   ├── partition_pipeline.py  # Deterministic crop, collage & bbox projection
 │   ├── process_all_partitions.py # Batch processor for all resolution subsets
 │   ├── benchmark_gpu.py       # Two-tier latency benchmark (Inference + E2E)
+│   ├── rebenchmark_fps.py     # Batch FPS & latency re-verification orchestrator
 │   └── train_eval_benchmark.py # Training, calibration, testing & reporting orchestrator
 ├── results_timestamp.md       # Compiled benchmark markdown tables
 └── README.md
@@ -131,7 +153,13 @@ To re-evaluate existing trained models and regenerate the markdown tables:
 ```bash
 python scripts/train_eval_benchmark.py --resolutions 640x640 320x320 160x160 80x80 --phase test_only --device 0
 ```
-Outputs are written to `results/summary_table.csv`, `results/per_class_summary.csv`, and `results_timestamp.md`.
+
+### 5. Re-Run Throughput & Latency Benchmarks
+To run a batch benchmark across all 36 models on GPU:
+```bash
+python scripts/rebenchmark_fps.py
+```
+Outputs are written to `results/summary_table.csv`, `results/rebenchmarked_fps.csv`, and `results_timestamp.md`.
 
 ---
 
