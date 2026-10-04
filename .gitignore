@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch weights and models
+*.pt
+*.pth
+models/pretrained/
+
+# Large datasets & generated partitions
+data/
+partitions/
+
+# Ultralytics training runs & checkpoints
+runs/
+
+# Large Photoshop binary assets
+*.psd
+
+# Logs & temp files
+*.log
+*.tmp
+
+# System and IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.gemini/
