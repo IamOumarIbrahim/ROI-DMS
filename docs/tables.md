@@ -25,7 +25,7 @@
 | 80×80 | Downscale from 640 | Bilinear | 0.701 ± 0.079 | 0.584 ± 0.012 | 0.635 ± 0.035 | 0.520 ± 0.047 | 0.294 ± 0.015 | 0.1 | 9.96 ± 0.42 | 2.59 |
 
 ## Table 4: Detection Accuracy and Spatial Preprocessing Overhead
-Empirical benchmark measured across 500 images (Mean ± Std ms) on NVIDIA RTX 4060 host.
+Empirical benchmark measured across 5,000 images (Mean ± Std ms) on NVIDIA RTX 4060 host.
 - **Baseline**: 0.00 ms (native hardware capture at resolution $R$).
 - **Cropped**: $640 \to 400$ ROI crop followed by bilinear resampling to resolution $R$.
 - **Collage**: Pure 3-patch spatial tiling on native resolution $R$ image (no downscale included).
@@ -36,11 +36,11 @@ Empirical benchmark measured across 500 images (Mean ± Std ms) on NVIDIA RTX 40
 | | 320 | **0.769 ± 0.006** | 0.00 ± 0.00 |
 | | 160 | 0.728 ± 0.002 | 0.00 ± 0.00 |
 | | 80 | 0.665 ± 0.023 | 0.00 ± 0.00 |
-| **Cropped** | 640* | 0.756 ± 0.012 | 2.63 ± 0.47 |
-| | 320 | **0.786 ± 0.004** | 1.12 ± 0.44 |
-| | 160 | 0.754 ± 0.014 | 0.59 ± 0.10 |
-| | 80 | 0.706 ± 0.007 | 0.48 ± 0.11 |
-| **Collage** | 640 | 0.721 ± 0.016 | 0.59 ± 0.09 |
-| | 320 | **0.735 ± 0.001** | 0.06 ± 0.02 |
-| | 160 | 0.643 ± 0.017 | 0.02 ± 0.01 |
-| | 80 | 0.483 ± 0.040 | 0.02 ± 0.01 |
+| **Cropped** | 640* | 0.756 ± 0.012 | 2.76 ± 0.50 |
+| | 320 | **0.786 ± 0.004** | 1.15 ± 0.27 |
+| | 160 | 0.754 ± 0.014 | 0.67 ± 0.17 |
+| | 80 | 0.706 ± 0.007 | 0.52 ± 0.14 |
+| **Collage** | 640 | 0.721 ± 0.016 | 0.57 ± 0.16 |
+| | 320 | **0.735 ± 0.001** | 0.15 ± 0.06 |
+| | 160 | 0.643 ± 0.017 | 0.05 ± 0.05 |
+| | 80 | 0.483 ± 0.040 | 0.03 ± 0.02 |
