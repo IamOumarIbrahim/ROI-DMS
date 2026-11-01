@@ -4,7 +4,7 @@
 [![YOLO11n](https://img.shields.io/badge/model-YOLO11n-green.svg)](https://docs.ultralytics.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An empirical investigation into **input-space spatial compression** for safety-critical Driver Monitoring Systems (DMS) on the Driver Monitoring Dataset (DMD). We evaluate whether spatial restructuring and region-of-interest cropping preserve fine-grained driver distraction detection across extreme resolution scaling ($640 \times 640 \rightarrow 80 \times 80$) while reducing computational footprint.
+Evaluates input-space spatial compression for safety-critical Driver Monitoring Systems (DMS) on DMD, testing whether ROI cropping preserves fine-grained distraction detection across extreme resolution scaling (640×640 → 80×80).
 
 ---
 
@@ -23,21 +23,15 @@ An empirical investigation into **input-space spatial compression** for safety-c
 
 ---
 
-## Experimental Setup & Rigor
+## Experimental Setup
 
 * **Model**: Ultralytics `YOLO11n` (2.59M parameters, 6.4 GFLOPs at 640×640).
 * **Partitions Tested**:
   * **Baseline**: Full $640 \times 640$ frame downscaled bilinearly ($640$, $320$, $160$, $80$).
   * **Cropped ROI**: Fixed $400 \times 400$ driver-centric bounding region ($X \in [140, 540], Y \in [120, 520]$).
   * **Collage**: 3-strip canonical interaction composite (Head strip + Left/Right interaction quadrants).
-* **Disjoint Subject Split (8:3:3)**:
-  * **Train (8 subjects)**: `subject_01`, `04`, `06`, `07`, `08`, `09`, `13`, `14` (8,984 images)
-  * **Val (3 subjects)**: `subject_02`, `03`, `11` (3,423 images)
-  * **Test (3 subjects)**: `subject_05`, `10`, `12` (3,213 images)
-  * *Strictly zero subject overlap across splits.*
-* **Zero Data Leakage Calibration**:
-  * Confidence threshold $\tau^*$ is calibrated out-of-sample on the `val` split to maximize macro F1, frozen, and evaluated blind on the held-out `test` split.
-* **Seeds**: 3 independent seeds ($0, 1, 2$) per configuration ($36$ models trained to 100 epochs with AMP, batch size 16).
+* **Disjoint Subject Split (8:3:3)**: Train 8 subjects (8,984 images) / Val 3 subjects (3,423 images) / Test 3 subjects (3,213 images). Strictly zero subject overlap across splits.
+* Confidence threshold $\tau^*$ calibrated on `val` (max macro F1), evaluated blind on `test`; 3 seeds × 4 resolutions × 3 methods = 36 models trained to 100 epochs (AMP, batch 16).
 
 ---
 
@@ -131,34 +125,14 @@ ROI-DMS/
 
 ## Reproducing Results
 
-### 1. Requirements
 ```bash
 pip install ultralytics torch torchvision pandas numpy pillow
-```
-
-### 2. Generate Dataset Partitions
-Generate the deterministic multi-resolution partitions from the raw DMD dataset:
-```bash
 python scripts/process_all_partitions.py
-```
-
-### 3. Run Training, Validation, and Evaluation
-Run the complete experimental pipeline across all 3 seeds and 4 resolutions:
-```bash
 python scripts/train_eval_benchmark.py --resolutions 640x640 320x320 160x160 80x80 --seeds 0 1 2 --phase all --device 0
-```
-
-### 4. Standalone Benchmark & Report Generation
-To re-evaluate existing trained models and regenerate the markdown tables:
-```bash
 python scripts/train_eval_benchmark.py --resolutions 640x640 320x320 160x160 80x80 --phase test_only --device 0
-```
-
-### 5. Re-Run Throughput & Latency Benchmarks
-To run a batch benchmark across all 36 models on GPU:
-```bash
 python scripts/rebenchmark_fps.py
 ```
+
 Outputs are written to `results/summary_table.csv`, `results/rebenchmarked_fps.csv`, and `results_timestamp.md`.
 
 ---
